@@ -16,11 +16,17 @@ function App() {
             status: -1 //all:-1, active:1, deactive:0
         }
     )
+    const [keyword, setKeyword] = useState(null)
+    const [sort, setSort] = useState({
+        by: 'name',
+        value: 1
+    })
+
 
     useEffect(() => {
 
         if (localStorage && localStorage.getItem('tasks')) {
-
+           
             var tasks = JSON.parse(localStorage.getItem('tasks'))
             setTask(tasks);
         } else {
@@ -28,6 +34,8 @@ function App() {
         }
 
     }, []);
+
+
     const onGenerateData = () => {
         var def_tasks = [
             {
@@ -144,26 +152,91 @@ function App() {
     const onFilter = (filterName, filterStatus) => {
         filterStatus = parseInt(filterStatus, 10)
         setFilter({
-            name: filterName,
+            name: filterName.toLowerCase(),
             status: filterStatus
         });
     }
 
 
-    useEffect(()=>{
+    useEffect(() => {
+        let yyy = [...tasks]
         if (filter) {
             if (filter.name) {
-                var yyy = tasks.filter((task) => {
-                    console.log(task.name.toLowerCase().indexOf(filter.name))
+                yyy = yyy.filter((task) => {
                     return task.name.toLowerCase().indexOf(filter.name) !== -1
                 })
-                setTaskedSearch(yyy)
+            }
+            yyy = yyy.filter((task) => {
+                if (filter.status === -1) {
+                    return task;
+                } else {
+                    return task.status === (filter.status === 1 ? true : false)
+                }
+            })
+
+        }
+        if (keyword) {
+        console.log('co ')
+
+            yyy = yyy.filter((task) => {
+                return task.name.toLowerCase().indexOf(keyword) !== -1
+            })
+        }
+        console.log(yyy)
+        setTaskedSearch(yyy)
+    }, [filter, tasks, keyword])
+
+    if(sort.by==='name') {
+        tasks.sort((a,b) =>{
+            if(a.name>b.name) return sort.value;
+            else if(a.name<b.name) return -sort.value;
+            else return 0;
+        })
+    }else{
+        tasks.sort((a,b) =>{
+            if(a.status>b.status) return -sort.value;
+            else if(a.status<b.status) return sort.value;
+            else return 0;
+        })
+    }
+    console.log('render')
+    const onSearch = (keyword) => {
+        console.log(keyword)
+        setKeyword(keyword)
+    }
+
+
+    function isEqual(objA, objB) {
+        // Tạo các mảng chứa tên các property
+        var aProps = Object.getOwnPropertyNames(objA);
+        var bProps = Object.getOwnPropertyNames(objB);
+        // Nếu độ dài của mảng không bằng nhau,
+        // thì 2 objects đó không bằnh nhau.
+        if (aProps.length !== bProps.length) {
+            return false;
+        }
+
+        for (var i = 0; i < aProps.length; i++) {
+            var propName = aProps[i];
+            // Nếu giá trị của cùng một property mà không bằng nhau,
+            // thì 2 objects không bằng nhau.
+            if (objA[propName] !== objB[propName]) {
+                return false;
             }
         }
-    },[filter])
-    
+        // Nếu code chạy đến đây,
+        // tức là 2 objects được tính lằ bằng nhau.
+        return true;
+    }
 
-
+    // SORT
+    const onSort = (sortBy, sortValue) => {
+        console.log(sortBy, sortValue);
+        setSort({
+            by: sortBy,
+            value: sortValue
+        })
+    }
 
     /////////////////////////////////
     //Đóng, mở TaskForm 
@@ -201,11 +274,11 @@ function App() {
                         Generate Data
                     </button>
                     {/* SEARCH-SORT */}
-                    <TaskControl />
+                    <TaskControl onSearch={onSearch} onSort={onSort}  />
                     {/* LIST */}
                     <div className="row mt-15">
                         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                            <TaskList tasks={filter.name?taskedSearch:tasks} onUpdateStatus={onUpdateStatus} onDelete={onDelete} onUpdate={onUpdate} onFilter={onFilter} />
+                            <TaskList tasks={!isEqual(filter, { name: "", status: -1 })||keyword!==null ? taskedSearch:tasks} onUpdateStatus={onUpdateStatus} onDelete={onDelete} onUpdate={onUpdate} onFilter={onFilter} />
                         </div>
                     </div>
                 </div>
