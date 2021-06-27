@@ -1,11 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function TaskForm(props) {
 
     const [jobs, setJobs] = useState({
+        id: '',
         name: '',
         status: false,
     });
+
+    useEffect(() => {
+
+        if (props.task) {
+            setJobs({
+                id: props.task.id,
+                name: props.task.name,
+                status: props.task.status,
+            })
+            console.log(211212)
+        } else if (!props.task) {
+            setJobs({
+                id: '',
+                name: '',
+                status: false,
+            })
+        }
+
+    }, [props.task]);
+
 
     const onCloseForm = () => {
         props.onSendCloseForm();
@@ -18,7 +39,7 @@ function TaskForm(props) {
         if (name === 'status') {
             value = target.value === 'true' ? true : false;
         }
-        
+
         setJobs({ ...jobs, [name]: value })
     }
 
@@ -37,11 +58,11 @@ function TaskForm(props) {
     return (
         <div className="panel panel-warning">
             <div className="panel-heading">
-                <h3 className="panel-title">Thêm Công Việc
+                <h3 className="panel-title">
                     <span
                         className="fas fa-times-circle text-right"
                         onClick={onCloseForm}
-                    ></span></h3>
+                    ></span>{jobs.id === '' ? 'Thêm Công Việc' : 'Cập Nhật Công Việc'}</h3>
             </div>
             <div className="panel-body">
                 <form onSubmit={onHandleSubmit}>
