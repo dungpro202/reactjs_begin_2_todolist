@@ -3,6 +3,8 @@ import './App.css';
 import TaskForm from './components/TaskForm';
 import TaskControl from './components/TaskControl';
 import TaskList from './components/TaskList';
+import _ from 'lodash';  // tat ca 
+import { findIndex, filter } from 'lodash';
 
 function App() {
 
@@ -26,7 +28,7 @@ function App() {
     useEffect(() => {
 
         if (localStorage && localStorage.getItem('tasks')) {
-           
+
             var tasks = JSON.parse(localStorage.getItem('tasks'))
             setTask(tasks);
         } else {
@@ -106,7 +108,12 @@ function App() {
 
     //Update Status
     const onUpdateStatus = (id) => {
-        var index = findIndex(id);
+        // var index = findIndex(id);
+
+        // lodash _.findIndex -> findIndex
+        var index = _.findIndex(tasks, (task) => {
+            return task.id === id;
+        })
         if (index !== -1) {
             var tasks_temp = [...tasks];
             tasks_temp[index].status = !tasks_temp[index].status;
@@ -162,8 +169,12 @@ function App() {
         let yyy = [...tasks]
         if (filter) {
             if (filter.name) {
+                // yyy = yyy.filter((task) => {
+                //     return task.name.toLowerCase().indexOf(filter.name) !== -1
+                // })
                 yyy = yyy.filter((task) => {
                     return task.name.toLowerCase().indexOf(filter.name) !== -1
+
                 })
             }
             yyy = yyy.filter((task) => {
@@ -176,9 +187,9 @@ function App() {
 
         }
         if (keyword) {
-        console.log('co ')
+            console.log('co ')
 
-            yyy = yyy.filter((task) => {
+            yyy = _.filter(yyy, (task) => {
                 return task.name.toLowerCase().indexOf(keyword) !== -1
             })
         }
@@ -186,16 +197,16 @@ function App() {
         setTaskedSearch(yyy)
     }, [filter, tasks, keyword])
 
-    if(sort.by==='name') {
-        tasks.sort((a,b) =>{
-            if(a.name>b.name) return sort.value;
-            else if(a.name<b.name) return -sort.value;
+    if (sort.by === 'name') {
+        tasks.sort((a, b) => {
+            if (a.name > b.name) return sort.value;
+            else if (a.name < b.name) return -sort.value;
             else return 0;
         })
-    }else{
-        tasks.sort((a,b) =>{
-            if(a.status>b.status) return -sort.value;
-            else if(a.status<b.status) return sort.value;
+    } else {
+        tasks.sort((a, b) => {
+            if (a.status > b.status) return -sort.value;
+            else if (a.status < b.status) return sort.value;
             else return 0;
         })
     }
@@ -274,11 +285,11 @@ function App() {
                         Generate Data
                     </button>
                     {/* SEARCH-SORT */}
-                    <TaskControl onSearch={onSearch} onSort={onSort}  />
+                    <TaskControl onSearch={onSearch} onSort={onSort} />
                     {/* LIST */}
                     <div className="row mt-15">
                         <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                            <TaskList tasks={!isEqual(filter, { name: "", status: -1 })||keyword!==null ? taskedSearch:tasks} onUpdateStatus={onUpdateStatus} onDelete={onDelete} onUpdate={onUpdate} onFilter={onFilter} />
+                            <TaskList tasks={!isEqual(filter, { name: "", status: -1 }) || keyword !== null ? taskedSearch : tasks} onUpdateStatus={onUpdateStatus} onDelete={onDelete} onUpdate={onUpdate} onFilter={onFilter} />
                         </div>
                     </div>
                 </div>
